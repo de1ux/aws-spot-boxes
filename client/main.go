@@ -2,28 +2,51 @@ package main
 
 import (
 	"context"
+	"github.com/de1ux/aws-spot-boxes/generated/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
 
-	"github.com/kelseyhightower/envconfig"
+	"github.com/de1ux/aws-spot-boxes/common"
+
 	"golang.org/x/oauth2"
 )
 
-type config struct {
-	ClientId string
-	ClientSecret string
-	ClientRedirectPort string
+var (
+	c *common.Config
+)
+
+func init() {
+	var err error
+	c, err = common.GetConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
-	println(getIDToken())
+	idToken := getIDToken()
+	conn, err := grpc.Dial(c.ClientServiceURL, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "id_token", idToken)
+
+	client := api.NewAWSSpotBoxesClient(conn)
+
+	_, err = client.StartBox(ctx, &api.StartBoxRequest{})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getIDToken() (string) {
-	c := &config{}
-	if err := envconfig.Process("awsspotboxes", c); err != nil {
+	c, err := common.GetConfig()
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -58,13 +81,16 @@ func getIDToken() (string) {
 	})
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			log.Fatal(err)
-		}
+		srv.ListenAndServe()
 	}()
 
+	log.Printf("Waiting for redirect with id_token...")
 	idToken := <-done
-	srv.Shutdown(context.Background())
+	log.Printf(
+		"Waiting for redirect with id_token...got it!")
 
+	go func() {
+		srv.Shutdown(context.Background())
+	}()
 	return idToken
 }

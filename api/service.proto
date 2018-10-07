@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package api;
+
+message StartBoxRequest {
+
+}
+
+message StartBoxResponse {
+
+}
+
+message KeepAliveRequest {
+
+}
+
+message KeepAliveResponse {
+
+}
+
+service AWSSpotBoxes {
+    rpc StartBox(StartBoxRequest) returns (StartBoxResponse);
+    rpc KeepAlive(stream KeepAliveRequest) returns (stream KeepAliveResponse);
+}
