@@ -62,7 +62,7 @@ func (s *server) StartBox(ctx context.Context, request *api.StartBoxRequest) (*a
 			// Message from an error.
 			fmt.Println(err.Error())
 		}
-		return
+		return nil, err
 	}
 
 	fmt.Println(result)
@@ -110,6 +110,7 @@ func (s *server) StartBox(ctx context.Context, request *api.StartBoxRequest) (*a
 		time.Sleep(time.Second * 2)
 	}
 	println("Waiting for instance to become ready...done")
+
 
 
 	return &api.StartBoxResponse{}, nil
@@ -170,5 +171,5 @@ func Run(p common.Provider) error {
 	if err := s.Serve(lis); err != nil {
 		return err
 	}
-	log.Print("Server running...done")
+	return nil
 }
