@@ -28,7 +28,7 @@ func init() {
 }
 
 func main() {
-	idToken := getIDToken()
+	idToken := ""//getIDToken()
 	conn, err := grpc.Dial(c.ClientServiceURL, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)

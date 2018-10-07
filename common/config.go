@@ -11,6 +11,9 @@ type Config struct {
 	ClientServiceURL   string
 
 	ServerPort         string
+	ServerAWSRegion	   string
+	ServerAWSAccessID  string
+	ServerAWSSecretKey string
 }
 
 func GetConfig() (*Config, error) {
